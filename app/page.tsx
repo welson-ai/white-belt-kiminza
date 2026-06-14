@@ -13,6 +13,8 @@ export default function Home() {
   const [transactionStatus, setTransactionStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [transactionHash, setTransactionHash] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [contractId, setContractId] = useState('');
+  const [deployStatus, setDeployStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
   useEffect(() => {
     checkWalletConnection();
@@ -62,6 +64,8 @@ export default function Home() {
     setTransactionStatus('idle');
     setTransactionHash('');
     setErrorMessage('');
+    setContractId('');
+    setDeployStatus('idle');
   };
 
   const fetchBalance = async (key: string) => {
@@ -166,6 +170,81 @@ export default function Home() {
     }
   };
 
+  const deployContract = async () => {
+    if (!walletConnected) {
+      setErrorMessage('Please connect your wallet first');
+      return;
+    }
+
+    setDeployStatus('loading');
+    setErrorMessage('');
+
+    try {
+      // Read the WASM file
+      const wasmResponse = await fetch('/contracts/simple_contract.wasm');
+      if (!wasmResponse.ok) {
+        throw new Error('Failed to load WASM file');
+      }
+      const wasmBuffer = await wasmResponse.arrayBuffer();
+
+      // Get account details
+      const response = await fetch(`https://horizon-testnet.stellar.org/accounts/${publicKey}`);
+      if (!response.ok) {
+        throw new Error('Failed to load account');
+      }
+      const accountData = await response.json();
+
+      // Create Account object
+      const account = new Account(accountData.account_id, accountData.sequence);
+
+      // Create upload contract operation
+      const transaction = new TransactionBuilder(account, {
+        networkPassphrase: 'Test SDF Network ; September 2015',
+        fee: '100000',
+      })
+        .addOperation(
+          Operation.uploadContractWasm({
+            wasm: new Uint8Array(wasmBuffer),
+          })
+        )
+        .setTimeout(30)
+        .build();
+
+      // Sign transaction with Freighter
+      const signedTx = await signTransaction(transaction.toXDR());
+
+      // Submit transaction
+      const submitResponse = await fetch('https://horizon-testnet.stellar.org/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `tx=${encodeURIComponent(signedTx)}`,
+      });
+
+      if (!submitResponse.ok) {
+        const errorData = await submitResponse.json();
+        throw new Error(errorData.detail || 'Contract deployment failed');
+      }
+
+      const submitData = await submitResponse.json();
+      
+      // Extract WASM hash from the result
+      const wasmHash = submitData.result_xdr;
+      
+      setDeployStatus('success');
+      setContractId(submitData.hash);
+      setErrorMessage('');
+      
+      console.log('Contract deployed successfully!');
+      console.log('Transaction hash:', submitData.hash);
+    } catch (error) {
+      setDeployStatus('error');
+      setErrorMessage(error instanceof Error ? error.message : 'Contract deployment failed');
+      console.error('Error deploying contract:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
       <div className="max-w-2xl mx-auto">
@@ -203,6 +282,35 @@ export default function Home() {
               </div>
             )}
           </div>
+
+          {/* Smart Contract Deployment Section */}
+          {walletConnected && (
+            <div className="space-y-4 mb-8">
+              <h2 className="text-xl font-semibold text-white mb-4">Deploy Smart Contract</h2>
+              
+              <button
+                onClick={deployContract}
+                disabled={deployStatus === 'loading'}
+                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {deployStatus === 'loading' ? 'Deploying...' : 'Deploy Counter Contract'}
+              </button>
+
+              {deployStatus === 'success' && (
+                <div className="bg-green-500/20 border border-green-500/50 rounded-xl p-4">
+                  <p className="text-green-300 font-semibold mb-2">Contract Deployed Successfully!</p>
+                  <p className="text-white text-sm break-all">Transaction Hash: {contractId}</p>
+                </div>
+              )}
+
+              {deployStatus === 'error' && (
+                <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-4">
+                  <p className="text-red-300 font-semibold mb-2">Deployment Failed</p>
+                  <p className="text-white text-sm">{errorMessage}</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Transaction Section */}
           {walletConnected && (

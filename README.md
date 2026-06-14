@@ -12,6 +12,8 @@ This application is built with Next.js, TypeScript, and Tailwind CSS, providing 
 - Real-time XLM balance fetching from Stellar Testnet
 - XLM transaction sending with proper error handling
 - Transaction success/failure feedback with hash display
+- Smart contract deployment to Stellar testnet
+- Simple counter smart contract implementation
 - Modern responsive UI with gradient design
 - Comprehensive error handling and user feedback
 - Testnet-only operations for safe testing
@@ -22,6 +24,7 @@ This application is built with Next.js, TypeScript, and Tailwind CSS, providing 
 - Tailwind CSS for styling
 - @stellar/stellar-sdk for Stellar blockchain operations
 - @stellar/freighter-api for wallet integration
+- Rust and Soroban SDK for smart contract development
 - React hooks for state management
 
 ## Setup Instructions
@@ -86,6 +89,44 @@ To create a production build:
 npm run build
 npm start
 ```
+
+## Smart Contract Development
+
+This project includes a simple counter smart contract written in Rust using the Soroban SDK.
+
+### Building the Smart Contract
+
+To build the smart contract:
+
+```bash
+cd contracts
+cargo build --target wasm32-unknown-unknown --release
+```
+
+The compiled WASM file will be located at `contracts/target/wasm32-unknown-unknown/release/simple_contract.wasm`.
+
+### Smart Contract Features
+
+The counter contract includes the following functions:
+
+- `init(initial_value)`: Initialize the counter with a starting value
+- `get()`: Get the current counter value
+- `increment()`: Increment the counter by 1
+- `decrement()`: Decrement the counter by 1
+- `add(value)`: Add a specific value to the counter
+- `reset()`: Reset the counter to zero
+
+### Deploying the Smart Contract
+
+The smart contract can be deployed directly through the web application:
+
+1. Connect your Freighter wallet to the application
+2. Click the "Deploy Counter Contract" button
+3. Approve the transaction in Freighter
+4. The contract will be deployed to Stellar testnet
+5. The transaction hash will be displayed upon successful deployment
+
+The compiled WASM file is automatically included in the public directory for web deployment.
 
 ## Network Information
 

@@ -1,0 +1,1 @@
+/Users/h/Documents/belt\ 1\ -\ kiminnza/stellar-wallet-app/contracts/target/wasm32-unknown-unknown/release/libsimple_contract.rlib: /Users/h/Documents/belt\ 1\ -\ kiminnza/stellar-wallet-app/contracts/src/lib.rs
