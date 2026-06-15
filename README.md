@@ -1,3 +1,17 @@
+### Screenshots
+
+#### Wallet Setup
+![Wallet Setup](images/Screenshot1.png)
+
+#### Wallet Connection
+![Wallet Connection](images/screenshot2.jpeg)
+
+#### Funding Testnets
+![Funding Testnets](images/screenshot3.png)
+
+
+
+
 # Stellar Wallet Integration
 
 A modern web application for interacting with the Stellar blockchain using the Freighter wallet. This project provides a complete wallet integration solution with support for Stellar Testnet, allowing users to connect their wallet, check balances, and send XLM transactions.
