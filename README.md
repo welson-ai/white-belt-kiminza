@@ -1,13 +1,14 @@
 ### Screenshots
 
-#### Wallet Setup
-![Wallet Setup](images/Screenshot1.png)
+#### Wallet connected state and balance displayed
 
-#### Wallet Connection
-![Wallet Connection](images/screenshot2.jpeg)
+![Wallet Setup](public/image2)
 
-#### Funding Testnets
-![Funding Testnets](images/screenshot3.png)
+#### Successful testnet transaction
+![Funding Testnets](public/image5)
+
+#### The transaction result is shown to the user
+![Funding Testnets](public/image4)
 
 
 
